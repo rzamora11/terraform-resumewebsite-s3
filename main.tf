@@ -1,14 +1,27 @@
-resource "aws_s3_bucket" "static_site" {
-  bucket = var.bucket_name
-
-  website {
-    index_document = var.website_index_document
-    error_document = var.website_error_document
-  }
-
-  acl = "public-read"
+resource "aws_s3_bucket" "static_site"{
+    bucket = var.bucket_name
 }
 
+resource "aws_s3_bucket_website_configuration" "example" {
+  bucket = aws_s3_bucket.static_site.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
+  }
+
+  routing_rule {
+    condition {
+      key_prefix_equals = "docs/"
+    }
+    redirect {
+      replace_key_prefix_with = "documents/"
+    }
+  }
+}
 /*resource "aws_s3_bucket_policy" "static_site_policy" {
   bucket = aws_s3_bucket.static_site.id
 
