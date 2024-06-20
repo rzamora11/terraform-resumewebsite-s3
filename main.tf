@@ -2,7 +2,7 @@ resource "aws_s3_bucket" "static_site"{
     bucket = var.bucket_name
 }
 
-/*resource "aws_s3_bucket_website_configuration" "example" {
+resource "aws_s3_bucket_website_configuration" "example" {
   bucket = aws_s3_bucket.static_site.id
 
   index_document {
@@ -48,4 +48,4 @@ resource "aws_s3_bucket_acl" "example" {
 
   bucket = aws_s3_bucket.static_site.id
   acl    = "public-read"
-}*/
+}
