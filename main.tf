@@ -100,10 +100,10 @@ resource "aws_s3_object" "website_files" {
 
 # Local file list function
 locals {
-  extname = regex("(\\..+$)", file)[0]
 
   files = [
     for file in fileset("website_content", "**/*") : {
+      extname = regex("(\\..+$)", file)[0],
       source       = "${path.module}/website_content/${file}",
       key          = file,
       content_type = local.content_type_map[extname(file)]
