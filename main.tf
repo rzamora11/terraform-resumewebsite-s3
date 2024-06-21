@@ -106,7 +106,7 @@ locals {
       extname = regex("(\\..+$)", file)[0],
       source       = "${path.module}/website_content/${file}",
       key          = file,
-      content_type = local.content_type_map[extname(file)]
+      content_type = local.content_type_map[split(".",file)[0]]
     }
   ]
 
