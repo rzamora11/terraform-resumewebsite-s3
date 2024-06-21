@@ -78,9 +78,9 @@ resource "aws_s3_bucket_policy" "public_policy" {
 # Local file list function
 locals {
   files = [
-    for file in fileset("MyResume", "**/*"):
+    for file in fileset("website_content", "**/*"):
     {
-      source = "${path.module}/MyResume/${file}",
+      source = "${path.module}/website_content/${file}",
       key    = file
     }
   ]
