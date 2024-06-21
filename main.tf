@@ -97,21 +97,32 @@ resource "aws_s3_object" "website_files" {
   content_type = "text/html"
   etag   = filemd5(each.value.source)
 }*/
+
 # Local file list function
 locals {
   files = [
-    for file in fileset("website_content", "**/*"):
-    {
+    for file in fileset("website_content", "**/*") : {
       source       = "${path.module}/website_content/${file}",
       key          = file,
-      content_type = lookup({
-        ".html" = "text/html",
-        ".css"  = "text/css",
-        ".js"   = "application/javascript",
-        default = "application/octet-stream"
-      }, substr(file, -5), "application/octet-stream"),
+      content_type = local.content_type_map[path.extname(file)]
     }
   ]
+
+  content_type_map = {
+    ".html" = "text/html",
+    ".css"  = "text/css",
+    ".js"   = "application/javascript",
+    ".png"  = "image/png",
+    ".jpg"  = "image/jpeg",
+    ".jpeg" = "image/jpeg",
+    ".gif"  = "image/gif",
+    ".svg"  = "image/svg+xml",
+    ".pdf"  = "application/pdf",
+    ".txt"  = "text/plain",
+    ".json" = "application/json",
+    ".xml"  = "application/xml",
+    default = "application/octet-stream"
+  }
 }
 
 # Iterate over the list of files and upload each one
