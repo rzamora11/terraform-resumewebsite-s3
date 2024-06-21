@@ -50,17 +50,13 @@ resource "aws_s3_bucket_acl" "example" {
   acl    = "public-read"
 }
 
-resource "aws_s3_object" "object" {
+/*resource "aws_s3_object" "object" {
   bucket = var.bucket_name
   key    = "index.html"
-  source = "./resumewebsite/index.html"
-
-  # The filemd5() function is available in Terraform 0.11.12 and later
-  # For Terraform 0.11.11 and earlier, use the md5() function and the file() function:
-  # etag = "${md5(file("path/to/file"))}"
-  etag = filemd5("./resumewebsite/index.html")
+  source = var.website_path
+  etag = filemd5(var.websitepath)
   content_type = "text/html"
-}
+}*/
 
 resource "aws_s3_bucket_policy" "public_policy" {
   bucket = aws_s3_bucket.static_site.id
@@ -77,4 +73,27 @@ resource "aws_s3_bucket_policy" "public_policy" {
       }
     ]
   })
+}
+
+# Local file list function
+locals {
+  files = [
+    for file in fileset("resumewebsite", "**/*"):
+    {
+      source = "${path.module}/resumewebsite/${file}",
+      key    = file
+    }
+  ]
+}
+
+# Iterate over the list of files and upload each one
+resource "aws_s3_object" "website_files" {
+  for_each = { for file in local.files : file.key => file }
+
+  bucket = aws_s3_bucket.static_site.id
+  key    = each.value.key
+  source = each.value.source
+  acl    = "public-read"
+  content_type = "text/html"
+  etag   = filemd5(each.value.source)
 }
