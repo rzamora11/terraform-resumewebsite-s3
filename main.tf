@@ -112,16 +112,16 @@ locals {
   content_type_map = {
     "html" = "text/html",
     "css"  = "text/css",
-    ".js"   = "application/javascript",
-    ".png"  = "image/png",
-    ".jpg"  = "image/jpeg",
-    ".jpeg" = "image/jpeg",
-    ".gif"  = "image/gif",
-    ".svg"  = "image/svg+xml",
-    ".pdf"  = "application/pdf",
-    ".txt"  = "text/plain",
-    ".json" = "application/json",
-    ".xml"  = "application/xml",
+    "js"   = "application/javascript",
+    "png"  = "image/png",
+    "jpg"  = "image/jpeg",
+    "jpeg" = "image/jpeg",
+    "gif"  = "image/gif",
+    "svg"  = "image/svg+xml",
+    "pdf"  = "application/pdf",
+    "txt"  = "text/plain",
+    "json" = "application/json",
+    "xml"  = "application/xml",
     default = "application/octet-stream"
   }
 }
