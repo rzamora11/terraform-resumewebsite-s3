@@ -105,7 +105,7 @@ locals {
     for file in fileset("website_content", "**/*") : {
       source       = "${path.module}/website_content/${file}",
       key          = file,
-      content_type = "text/html" #local.content_type_map[split(".",file)[0]]
+      content_type = local.content_type_map[split(".",file)[1]]
     }
   ]
 
