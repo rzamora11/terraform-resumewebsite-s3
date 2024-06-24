@@ -98,8 +98,6 @@ resource "aws_s3_object" "website_files" {
   etag   = filemd5(each.value.source)
 }*/
 
-
-
 # Iterate over the list of files and upload each one
 resource "aws_s3_object" "website_files" {
   for_each = { for file in local.files : file.key => file }
