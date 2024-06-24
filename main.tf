@@ -122,7 +122,8 @@ locals {
     "txt"  = "text/plain",
     "json" = "application/json",
     "xml"  = "application/xml",
-    "default" = "application/octet-stream"
+    "ico"  = "image/x-icon",
+    default = "application/octet-stream"
   }
 }
 
