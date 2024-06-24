@@ -11,14 +11,14 @@ resource "aws_s3_bucket_website_configuration" "example" {
   redirect_all_requests_to {
     host_name = aws_s3_bucket.static_site.website_endpoint
   }
-  routing_rule {
+  /*routing_rule {
     condition {
       key_prefix_equals = "docs/"
     }
     redirect {
       replace_key_prefix_with = "documents/"
     }
-  }
+  }*/
 }
 
 
