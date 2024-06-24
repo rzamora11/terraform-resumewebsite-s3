@@ -5,9 +5,9 @@ resource "aws_s3_bucket" "static_site"{
 resource "aws_s3_bucket_website_configuration" "example" {
   bucket = aws_s3_bucket.static_site.id
 
-  index_document {
+  /*index_document {
     suffix = "index.html"
-  }
+  }*/
   redirect_all_requests_to {
     host_name = aws_s3_bucket.static_site.website_endpoint
   }
