@@ -76,7 +76,7 @@ resource "aws_s3_bucket_policy" "public_policy" {
 }
 
 # Local file list function
-locals {
+/*locals {
   files = [
     for file in fileset("website_content", "**//*"):
     {
@@ -96,5 +96,44 @@ resource "aws_s3_object" "website_files" {
   acl    = "public-read"
   content_type = "text/html"
   etag   = filemd5(each.value.source)
+}*/
+
+# Local file list function
+locals {
+
+  files = [
+    for file in fileset("website_content", "**/*") : {
+      source       = "${path.module}/website_content/${file}",
+      key          = file,
+      content_type = local.content_type_map[split(".",file)[0]]
+    }
+  ]
+
+  content_type_map = {
+    ".html" = "text/html",
+    ".css"  = "text/css",
+    ".js"   = "application/javascript",
+    ".png"  = "image/png",
+    ".jpg"  = "image/jpeg",
+    ".jpeg" = "image/jpeg",
+    ".gif"  = "image/gif",
+    ".svg"  = "image/svg+xml",
+    ".pdf"  = "application/pdf",
+    ".txt"  = "text/plain",
+    ".json" = "application/json",
+    ".xml"  = "application/xml",
+    default = "application/octet-stream"
+  }
 }
 
+# Iterate over the list of files and upload each one
+resource "aws_s3_object" "website_files" {
+  for_each = { for file in local.files : file.key => file }
+
+  bucket       = aws_s3_bucket.static_site.id
+  key          = each.value.key
+  source       = each.value.source
+  acl          = "public-read"
+  content_type = each.value.content_type
+  etag         = filemd5(each.value.source)
+}
