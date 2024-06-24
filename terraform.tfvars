@@ -1,1 +1,1 @@
-bucket_name = "my-static-resume-website"
+bucket_name = "romanzamoracarreras-myresume"
