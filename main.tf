@@ -122,7 +122,7 @@ locals {
     "txt"  = "text/plain",
     "json" = "application/json",
     "xml"  = "application/xml",
-    default = "application/octet-stream"
+    "default" = "application/octet-stream"
   }
 }
 
