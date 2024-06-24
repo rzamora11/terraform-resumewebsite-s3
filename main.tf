@@ -103,7 +103,6 @@ locals {
 
   files = [
     for file in fileset("website_content", "**/*") : {
-      extname = regex("(\\..+$)", file)[0],
       source       = "${path.module}/website_content/${file}",
       key          = file,
       content_type = local.content_type_map[split(".",file)[0]]
