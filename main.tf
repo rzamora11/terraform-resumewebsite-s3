@@ -104,3 +104,19 @@ resource "aws_s3_object" "website_files" {
   content_type = each.value.content_type
   etag         = filemd5(each.value.source)
 }
+
+
+resource "aws_route_53_zone" "exampleDomain" {
+  name = var.domain_name
+}
+
+resource "aws_route53_record" "exampleDomain-a" {
+  zone_id = aws_route53_zone.exampleDomain.zone_id
+  name    = var.domain_name
+  type    = "A"
+  alias {
+    name                   = aws_s3_bucket.example.website_endpoint
+    zone_id                = aws_s3_bucket.example.hosted_zone_id
+    evaluate_target_health = true
+  }
+}
