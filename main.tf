@@ -106,17 +106,18 @@ resource "aws_s3_object" "website_files" {
 }
 
 
-resource "aws_route_53_zone" "exampleDomain" {
+resource "aws_route53_zone" "main" {
   name = var.domain_name
 }
 
-resource "aws_route53_record" "exampleDomain-a" {
-  zone_id = aws_route53_zone.exampleDomain.zone_id
+resource "aws_route53_record" "www" {
+  zone_id = aws_route53_zone.main.zone_id
   name    = var.domain_name
   type    = "A"
+
   alias {
-    name                   = aws_s3_bucket.example.website_endpoint
-    zone_id                = aws_s3_bucket.example.hosted_zone_id
-    evaluate_target_health = true
+    name                   = aws_s3_bucket.static_site.website_domain
+    zone_id                = aws_s3_bucket.static_site.hosted_zone_id
+    evaluate_target_health = false
   }
 }
