@@ -1,17 +1,3 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
-variable "bucket_name" {
-  description = "The name of the S3 bucket"
-  type        = string
-}
-
-variable "domain_name" {
-  description = "The domain name for the site"
-  type        = string
-}
-
 resource "aws_s3_bucket" "static_site" {
   bucket = var.bucket_name
 }
