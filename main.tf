@@ -46,6 +46,9 @@ resource "aws_s3_bucket_acl" "example" {
 }
 
 resource "aws_s3_bucket_policy" "public_policy" {
+  depends_on = [
+      aws_s3_bucket_acl.example
+    ]
   bucket = aws_s3_bucket.static_site.id
 
   policy = jsonencode({
