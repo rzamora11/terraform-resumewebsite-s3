@@ -92,6 +92,9 @@ locals {
 }
 
 resource "aws_s3_object" "website_files" {
+  depends_on = [
+      aws_s3_bucket_acl.example
+    ]
   for_each = { for file in local.files : file.key => file }
 
   bucket       = aws_s3_bucket.static_site.id
