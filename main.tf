@@ -109,7 +109,7 @@ resource "aws_s3_object" "website_files" {
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     domain_name = aws_s3_bucket.static_site.bucket_regional_domain_name
-    origin_id   = "s3-static-site"
+    origin_id   = aws_s3_bucket.static_site.bucket
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
@@ -123,7 +123,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "s3-static-site"
+    target_origin_id = aws_s3_bucket.static_site.bucket
 
     forwarded_values {
       query_string = false
