@@ -1,5 +1,19 @@
-resource "aws_s3_bucket" "static_site"{
-    bucket = var.bucket_name
+provider "aws" {
+  region = "us-east-1"
+}
+
+variable "bucket_name" {
+  description = "The name of the S3 bucket"
+  type        = string
+}
+
+variable "domain_name" {
+  description = "The domain name for the site"
+  type        = string
+}
+
+resource "aws_s3_bucket" "static_site" {
+  bucket = var.bucket_name
 }
 
 resource "aws_s3_bucket_website_configuration" "example" {
@@ -8,7 +22,7 @@ resource "aws_s3_bucket_website_configuration" "example" {
   index_document {
     suffix = "index.html"
   }
-  
+
   routing_rule {
     condition {
       key_prefix_equals = "docs/"
@@ -18,7 +32,6 @@ resource "aws_s3_bucket_website_configuration" "example" {
     }
   }
 }
-
 
 resource "aws_s3_bucket_ownership_controls" "example" {
   bucket = aws_s3_bucket.static_site.id
@@ -63,15 +76,12 @@ resource "aws_s3_bucket_policy" "public_policy" {
   })
 }
 
-
-# Local file list function
 locals {
-
   files = [
     for file in fileset("website_content", "**/*") : {
       source       = "${path.module}/website_content/${file}",
       key          = file,
-      content_type = local.content_type_map[split(".",file)[1]]
+      content_type = lookup(local.content_type_map, split(".", file)[1], "application/octet-stream")
     }
   ]
 
@@ -89,11 +99,9 @@ locals {
     "json" = "application/json",
     "xml"  = "application/xml",
     "ico"  = "image/x-icon",
-    default = "application/octet-stream"
   }
 }
 
-# Iterate over the list of files and upload each one
 resource "aws_s3_object" "website_files" {
   for_each = { for file in local.files : file.key => file }
 
@@ -103,56 +111,6 @@ resource "aws_s3_object" "website_files" {
   acl          = "public-read"
   content_type = each.value.content_type
   etag         = filemd5(each.value.source)
-}
-
-# HTTPS delivery
-resource "aws_cloudfront_distribution" "s3_distribution" {
-  origin {
-    domain_name = aws_s3_bucket.static_site.bucket_regional_domain_name
-    origin_id   = aws_s3_bucket.static_site.bucket
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
-    }
-  }
-
-  enabled             = true
-  is_ipv6_enabled     = true
-  default_root_object = "index.html"
-
-  default_cache_behavior {
-    allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = aws_s3_bucket.static_site.bucket
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
-  }
-
-  viewer_certificate {
-    acm_certificate_arn            = aws_acm_certificate.cert.arn
-    ssl_support_method              = "sni-only"
-    minimum_protocol_version        = "TLSv1.2_2021"
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  tags = {
-    Name = "S3StaticSiteCloudFront"
-  }
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
@@ -191,4 +149,57 @@ resource "aws_route53_record" "cert_validation" {
 resource "aws_acm_certificate_validation" "cert_validation" {
   certificate_arn         = aws_acm_certificate.cert.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+
+  depends_on = [aws_route53_record.cert_validation]
+}
+
+resource "aws_cloudfront_distribution" "s3_distribution" {
+  origin {
+    domain_name = aws_s3_bucket.static_site.bucket_regional_domain_name
+    origin_id   = "s3-static-site"
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "s3-static-site"
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  viewer_certificate {
+    acm_certificate_arn            = aws_acm_certificate.cert.arn
+    ssl_support_method              = "sni-only"
+    minimum_protocol_version        = "TLSv1.2_2021"
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  tags = {
+    Name = "S3StaticSiteCloudFront"
+  }
+
+  depends_on = [aws_acm_certificate_validation.cert_validation]
 }
