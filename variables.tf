@@ -1,7 +1,7 @@
 variable "region" {
   description = "The AWS region to deploy the S3 bucket in"
   type        = string
-  default     = "eu-west-2"
+  default     = "us-west-2"
 }
 
 variable "bucket_name" {
